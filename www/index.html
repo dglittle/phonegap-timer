@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="bootstrap.css">
+</head>
+<body>
+<script src="phonegap.js"></script>
+<script src="jquery.js"></script>
+<script src="bootstrap.js"></script>
+<script src="gl519.js"></script>
+<script>
+
+var timeDiv = $('<div/>')
+var stopTime = 0
+var timeout = null
+
+function updateTime() {
+    var timeLeft = stopTime - _.time()
+    if (timeLeft < 0) timeLeft = 0
+    var secs = Math.floor(timeLeft / 1000)
+    var mins = Math.floor(secs / 60)
+    var hours = Math.floor(mins / 60)
+    mins %= 60
+    secs %= 60
+    timeDiv.text(hours + ':' + mins + ':' + secs)
+    return timeLeft
+}
+updateTime()
+
+function addTime(t) {
+    if (t) {
+        if (stopTime < _.time()) stopTime = _.time()
+        stopTime += t
+    }
+
+    clearTimeout(timeout)
+    if (updateTime() > 0) {
+        timeout = setTimeout(addTime, 1000)
+    } else if (stopTime > 0) {
+        timeDiv.text('buzz!!!')
+        navigator.notification.vibrate(1000)
+    }
+}
+
+function clearTime() {
+    stopTime = 0
+    addTime(0)
+}
+
+$(function () {
+    $('body').append(
+        $('<div class="container">').append(
+            timeDiv
+        )
+    ).append(
+        $('<div class="container">').append(
+            $('<button class="btn btn-default">').text('1 min').click(function () {
+                addTime(1000 * 60)
+            })
+        ).append(
+            $('<button class="btn btn-default">').text('5 min').click(function () {
+                addTime(1000 * 60 * 5)
+            })
+        ).append(
+            $('<button class="btn btn-default">').text('10 min').click(function () {
+                addTime(1000 * 60 * 10)
+            })
+        ).append(
+            $('<button class="btn btn-default">').text('clear').click(function () {
+                clearTime()
+            })
+        )
+    )
+})
+
+</script>
+</body>
+</html>
